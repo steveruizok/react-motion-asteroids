@@ -1,8 +1,9 @@
-import React, { ReactChildren } from 'react'
+import React from 'react'
 import './App.css'
-import { motion, MotionValue } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { screen, game } from './game/index'
 import { Ship, Asteroid, Bullet, EndScreen } from './components/index'
+import { range, random } from 'lodash'
 
 const App: React.FC = () => {
 	const [asteroids, setAsteroids] = React.useState(game.asteroids)
@@ -23,6 +24,21 @@ const App: React.FC = () => {
 			window.removeEventListener('keyup', game.handleKeyUp)
 		}
 	}, [])
+
+	const stars = React.useMemo(() => {
+		return range(100).map((i) => (
+			<motion.div
+				style={{
+					position: 'absolute',
+					x: random(0, screen.width),
+					y: random(0, screen.height),
+					height: random(1, 2),
+					width: random(1, 2),
+					backgroundColor: '#41ff02',
+				}}
+			/>
+		))
+	}, [lives])
 
 	return (
 		<div
@@ -48,6 +64,7 @@ const App: React.FC = () => {
 					overflow: 'hidden',
 				}}
 			>
+				{stars}
 				{lives > 0 && (
 					<Ship
 						x={game.ship.x}
