@@ -28,7 +28,7 @@ export const Asteroid: React.FC<{
 			.slice(1)
 			.map((p) => p.join(','))
 			.join(' ')} Z`
-	}, [])
+	}, [radius])
 
 	return (
 		<PointWrapper x={x} y={y} angle={angle}>

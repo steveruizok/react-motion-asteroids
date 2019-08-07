@@ -1,32 +1,24 @@
 import React from 'react'
-import './App.css'
 import { motion } from 'framer-motion'
+import { range, random } from 'lodash'
+import { observer } from 'mobx-react-lite'
+
 import { screen, game } from './game/index'
 import { Ship, Asteroid, Bullet, EndScreen } from './components/index'
-import { range, random } from 'lodash'
+import './App.css'
 
-const App: React.FC = () => {
-	const [asteroids, setAsteroids] = React.useState(game.asteroids)
-	const [bullets, setBullets] = React.useState(game.bullets)
-	const [lives, setLives] = React.useState(game.lives)
+const App: React.FC = observer(() => {
+	// Observables
+	const { asteroids, bullets, lives, accuracy } = game
 
+	// Start Game
 	React.useEffect(() => {
-		game.setAsteroids = setAsteroids
-		game.setBullets = setBullets
-		game.setLives = setLives
-
-		window.addEventListener('keypress', game.handleKeyPress)
-		window.addEventListener('keydown', game.handleKeyDown)
-		window.addEventListener('keyup', game.handleKeyUp)
-		return () => {
-			window.removeEventListener('keypress', game.handleKeyPress)
-			window.removeEventListener('keydown', game.handleKeyDown)
-			window.removeEventListener('keyup', game.handleKeyUp)
-		}
+		game.start()
 	}, [])
 
+	// Generate stars on each life change
 	const stars = React.useMemo(() => {
-		return range(100).map((i) => (
+		return range(100 - lives).map((i) => (
 			<motion.div
 				style={{
 					position: 'absolute',
@@ -62,10 +54,12 @@ const App: React.FC = () => {
 					width: screen.width,
 					border: '1px solid #41FF00',
 					overflow: 'hidden',
+					position: 'relative',
 				}}
 			>
 				{stars}
-				{lives > 0 && (
+				{// ship
+				lives > 0 && (
 					<Ship
 						x={game.ship.x}
 						y={game.ship.y}
@@ -73,13 +67,18 @@ const App: React.FC = () => {
 						radius={game.ship.radius}
 					/>
 				)}
-				{Array.from(bullets).map(({ id, x, y, angle, radius }, i) => (
+				{// bullets
+				Array.from(bullets).map(({ id, x, y, angle, radius }, i) => (
 					<Bullet key={id} x={x} y={y} angle={angle} radius={radius} />
 				))}
-				{Array.from(asteroids).map(({ id, x, y, angle, radius }, i) => (
+				{// asteroids
+				Array.from(asteroids).map(({ id, x, y, angle, radius }, i) => (
 					<Asteroid key={id} x={x} y={y} angle={angle} radius={radius} />
 				))}
-				{lives <= 0 ? <EndScreen onClick={game.restart} /> : lives}
+				<div style={{ position: 'absolute', top: 0, left: 0, width: '100%' }}>
+					{accuracy ? (accuracy * 100).toFixed() + '%' : '100%'} |{' '}
+					{lives <= 0 ? <EndScreen onClick={game.restart} /> : lives}
+				</div>
 			</motion.div>
 			<div style={{ padding: 16 }}>
 				W thrust | A left | D right | SPACE shoot
@@ -89,6 +88,6 @@ const App: React.FC = () => {
 			</div>
 		</div>
 	)
-}
+})
 
 export default App

@@ -1,7 +1,9 @@
+import { range, random } from 'lodash'
+import { decorate, computed, observable } from 'mobx'
+
 import Ship from './ship'
 import Bullet from './bullet'
 import Asteroid from './asteroid'
-import { range, random } from 'lodash'
 
 export const screen = {
 	width: 600,
@@ -9,37 +11,11 @@ export const screen = {
 }
 
 export class Game {
-	// key presses
-	presses = new Map<string, () => void>()
-	handleKeyPress = (event: KeyboardEvent) => {
-		const action = this.presses.get(event.key)
-		if (action) action()
-	}
-	// buffered keys
-	inputs = new Map<string, () => void>()
-	keyBuffer = new Set<string>([])
-	handleKeyDown = (event: KeyboardEvent) => {
-		this.keyBuffer.add(event.key)
-	}
-	handleKeyUp = (event: KeyboardEvent) => {
-		this.keyBuffer.delete(event.key)
-	}
-	handleKey = (key: string) => {
-		const action = this.inputs.get(key)
-		if (action) action()
-	}
-	// react state
-	lives = 3
-	ship: Ship
-	bullets: Set<Bullet>
-	asteroids: Set<Asteroid>
-	paused = false
-	setLives: any = () => null
-	setAsteroids: any = () => null
-	setBullets: any = () => null
-	setPaused: any = () => null
-
 	constructor() {
+		window.addEventListener('keypress', this.handleKeyPress)
+		window.addEventListener('keydown', this.handleKeyDown)
+		window.addEventListener('keyup', this.handleKeyUp)
+
 		this.ship = new Ship({
 			x: screen.width / 2,
 			y: screen.height / 2,
@@ -56,6 +32,46 @@ export class Game {
 		)
 	}
 
+	/* ------------------------------- User Input ------------------------------- */
+
+	presses = new Map<string, () => void>()
+	inputs = new Map<string, () => void>()
+	keyBuffer = new Set<string>([])
+
+	handleKeyPress = (event: KeyboardEvent) => {
+		const action = this.presses.get(event.key)
+		if (action) action()
+	}
+
+	handleKeyDown = (event: KeyboardEvent) => {
+		this.keyBuffer.add(event.key)
+	}
+
+	handleKeyUp = (event: KeyboardEvent) => {
+		this.keyBuffer.delete(event.key)
+	}
+
+	handleKey = (key: string) => {
+		const action = this.inputs.get(key)
+		if (action) action()
+	}
+
+	/* ------------------------------- Observables ------------------------------ */
+
+	lives = 3
+
+	shots = 0
+
+	hits = 0
+
+	ship: Ship
+
+	bullets: Set<Bullet>
+
+	asteroids: Set<Asteroid>
+
+	/* ------------------------------- Game Events ------------------------------ */
+
 	start = () => {
 		this.ship.start()
 		this.bullets.forEach((asteroid) => asteroid.start())
@@ -66,9 +82,7 @@ export class Game {
 
 	handlePlayerDeath = () => {
 		this.lives -= 1
-		if (this.lives <= 0) {
-			this.setLives(this.lives)
-		} else {
+		if (this.lives >= 0) {
 			this.resetLevel()
 		}
 	}
@@ -94,10 +108,13 @@ export class Game {
 		this.ship.x.set(screen.width / 2)
 		this.ship.y.set(screen.height / 2)
 		this.ship.velocity = 0
-		this.setLives(this.lives)
-		this.setBullets(new Set(this.bullets))
-		this.setAsteroids(new Set(this.asteroids))
 	}
+
+	get accuracy() {
+		return this.hits / this.shots
+	}
+
+	/* ------------------------------- Main loop ------------------------------ */
 
 	loop = () => {
 		this.keyBuffer.forEach(this.handleKey)
@@ -106,9 +123,7 @@ export class Game {
 		this.bullets.forEach((asteroid) => asteroid.render())
 		this.asteroids.forEach((asteroid) => asteroid.render())
 
-		if (!this.paused) {
-			window.requestAnimationFrame(this.loop)
-		}
+		window.requestAnimationFrame(this.loop)
 
 		if (this.asteroids.size <= 0) {
 			this.resetLevel()
@@ -116,5 +131,15 @@ export class Game {
 	}
 }
 
+// Add observables
+decorate(Game, {
+	asteroids: observable,
+	bullets: observable,
+	lives: observable,
+	hits: observable,
+	shots: observable,
+	accuracy: computed,
+})
+
+// Create game
 export const game = new Game()
-game.start()

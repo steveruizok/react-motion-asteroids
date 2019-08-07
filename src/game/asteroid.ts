@@ -8,7 +8,7 @@ export default class Asteroid extends MovingObject {
 			defaults(options, {
 				velocity: random(0.2, 0.5),
 				angle: random(360),
-				radius: random(32, 128),
+				radius: random(32, 114),
 			})
 		)
 	}
@@ -19,7 +19,7 @@ export default class Asteroid extends MovingObject {
 			const r = random(0.25, 0.75)
 			game.asteroids.add(this.getChunk(r))
 			game.asteroids.add(this.getChunk(1 - r))
-			game.setAsteroids(new Set(game.asteroids))
+			// game.setAsteroids(new Set(game.asteroids))
 		}
 	}
 
@@ -41,6 +41,6 @@ export default class Asteroid extends MovingObject {
 
 	remove = () => {
 		game.asteroids.delete(this)
-		game.setAsteroids(new Set(game.asteroids))
+		// game.setAsteroids(new Set(game.asteroids))
 	}
 }

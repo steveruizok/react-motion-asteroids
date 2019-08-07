@@ -5,7 +5,9 @@ export const PointWrapper: React.FC<{
 	x: MotionValue<number>
 	y: MotionValue<number>
 	angle: MotionValue<number>
-}> = ({ x, y, angle, children }) => {
+	initial?: any
+	exit?: any
+}> = ({ x, y, angle, children, ...rest }) => {
 	return (
 		<motion.div
 			style={{
@@ -19,6 +21,7 @@ export const PointWrapper: React.FC<{
 				placeItems: 'center',
 				placeContent: 'center',
 			}}
+			{...rest}
 		>
 			{children}
 		</motion.div>

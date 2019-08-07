@@ -16,14 +16,18 @@ export default class Bullet extends MovingObject {
 			if (dead) return
 			if (asteroid.hitTest(this.x.get(), this.y.get())) {
 				dead = true
+				game.hits += 1
 				asteroid.break()
 			}
 		})
-		if (dead) this.remove()
+		if (dead) {
+			this.remove()
+		}
 	}
 
 	remove = () => {
+		game.shots += 1
 		game.bullets.delete(this)
-		game.setBullets(new Set(game.bullets))
+		// game.setBullets(new Set(game.bullets))
 	}
 }

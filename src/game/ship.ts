@@ -30,7 +30,9 @@ export default class Ship extends MovingObject {
 	}
 
 	shoot = () => {
-		const { angle, velocity } = this
+		const { angle, velocity, dead } = this
+		if (dead) return
+
 		const [x, y] = this.getOffsetPoint(this.radius + 3)
 
 		game.bullets.add(
@@ -42,6 +44,6 @@ export default class Ship extends MovingObject {
 			})
 		)
 
-		game.setBullets(new Set(game.bullets))
+		// game.setBullets(new Set(game.bullets))
 	}
 }

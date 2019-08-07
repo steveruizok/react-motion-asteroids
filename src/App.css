@@ -3,3 +3,15 @@
 .App {
 	text-align: center;
 }
+
+a {
+	font-size: 0.7em;
+	color: #41ff02;
+}
+
+a::hover {
+	color: #41ff02;
+}
+a::visited {
+	color: #41ff02;
+}
